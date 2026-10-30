@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nursing Workspace Matrix</title>
+  <!-- KaTeX for high-speed dosage formula rendering -->
+  <link rel="stylesheet" href="https://jsdelivr.net">
+  <script defer src="https://jsdelivr.net"></script>
+  <style>
+    :root {
+      --clinical-blue: #0284c7;    /* Primary navigation headers & accent rings */
+      --clinical-green: #16a34a;   /* Play buttons, active cycles, save actions */
+      --soft-yellow: #fef08a;      /* Alerts, flashcard responses, text selectors */
+      --bg: #0f172a;               /* DEEP NAVY BLUE: Replaces old off-white body background */
+      --text: #f8fafc;             /* SILK WHITE: Keeps text sharp and readable on dark blues */
+      --card-bg: #1e293b;          /* MIDNIGHT SLATE BLUE: Replaces old pure white workspace cards */
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 70px; overflow-x: hidden; }
+
+    /* LAYER 1: ABSOLUTE TOP FLASHCARD SCREEN CAROUSEL */
+    #flashcard-layer { 
+      background: linear-gradient(135deg, var(--clinical-blue), var(--clinical-green)); 
+      color: white; 
+      padding: 18px; 
+      border-radius: 0 0 16px 16px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    }
+    .flashcard-box { perspective: 1000px; margin: 12px 0; }
+    .card-inner { background: white; color: var(--text); height: 130px; border-radius: 12px; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 1.05rem; }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .front-side, .back-side { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 15px; }
+    .back-side { transform: rotateY(180deg); background: var(--soft-yellow); color: #1e293b; border-radius: 12px; border: 2px solid var(--clinical-green); }
+    
+    .timer-setting-bench { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8rem; }
+    .timer-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    .timer-inputs input { width: 100%; padding: 6px; border-radius: 6px; border: none; color: var(--text); font-weight: bold; }
+    
+    button { padding: 8px 14px; border: none; border-radius: 8px; background: var(--clinical-blue); color: white; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    button.sec { background: rgba(255,255,255,0.25); color: white; }
+
+    /* HIGHLIGHT QUICK BADGE INDICATOR */
+    #text-highlight-badge { position: fixed; background: #0f172a; color: var(--soft-yellow); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: none; z-index: 2000; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid var(--clinical-green); }
+
+    /* CONTAINER LAYOUT MATRIX */
+    .container { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+    @media(min-width: 768px) { .container { grid-template-columns: 260px 1fr; } }
+
+    /* LIBRARY SHELF PANEL */
+    .library-shelf { background: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); height: max-content; }
+    .file-link { display: block; color: var(--clinical-blue); text-decoration: none; padding: 8px; background: #f1f5f9; border-radius: 6px; margin-top: 6px; font-size: 0.85rem; font-weight: 600; border-left: 3px solid var(--clinical-green); text-align: left; }
+
+    /* MAIN EDITING & RESEARCH HUB */
+    .research-center-card { background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-top: 4px solid var(--clinical-blue); }
+    textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; margin-top: 8px; line-height: 1.4; color: var(--text); }
+    
+    /* ACADEMIC TOOLBOX DRAWERS */
+    #academic-drawer { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.12); border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 44px)); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); height: 55vh; z-index: 1000; }
+    #academic-drawer.open { transform: translateY(0); }
+    .drawer-handle-bar { height: 44px; background: #f1f5f9; border-radius: 16px 16px 0 0; text-align: center; line-height: 44px; font-weight: bold; cursor: pointer; color: var(--clinical-blue); border-bottom: 1px solid #e2e8f0; }
+    .tab-headers { display: flex; background: #e2e8f0; }
+    .tab-trigger { flex: 1; padding: 10px; border: none; background: transparent; color: #475569; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+    .tab-trigger.active { background: white; color: var(--clinical-blue); border-top: 2px solid var(--clinical-blue); }
+    .tab-window { display: none; padding: 15px; height: calc(100% - 88px); overflow-y: auto; }
+    .tab-window.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING INTERACTIVE HIGHLIGHT SHORTCUT -->
+  <div id="text-highlight-badge">⚡ Make Flashcard</div>
+
+  <!-- LAYER 1: ABSOLUTE TOP FLASHCARD CAROUSEL ENGINE -->
+  <section id="flashcard-layer">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+      <span id="slideshow-status" style="background:rgba(0,0,0,0.2); padding:3px 8px; border-radius:10px; color:var(--soft-yellow); font-weight:bold;">Status: Idle</span>
+      <span id="card-counter" style="font-weight:600;">Card: 0/0</span>
+    </div>
+
+    <div class="flashcard-box" onclick="toggleCardFlip()">
+      <div class="card-inner" id="flashcard-engine">
+        <div class="front-side" id="card-front-text">Your flashcard queue will generate here...</div>
+        <div class="back-side" id="card-back-text">Answer matrix block representation.</div>
+      </div>
+    </div>
+
+    <!-- METRIC CONFIGURATION PANEL -->
+    <div class="timer-setting-bench">
+      <div class="timer-inputs">
+        <div>
+          <label style="color:var(--soft-yellow); font-weight:bold;">❓ Question Timer (s):</label>
+          <input type="number" id="input-q-time" value="5" min="1">
+        </div>
+        <div>
+          <label style="color:var(--soft-yellow); font-weight:bold;">💡 Answer Timer (s):</label>
+          <input type="number" id="input-a-time" value="4" min="1">
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+        <span id="slideshow-countdown-ticker" style="font-family:monospace; font-weight:bold;">Next flip in: --</span>
+        <div style="display:flex; gap:6px;">
+          <button onclick="startFlashcardSlideshow()" style="background:var(--clinical-green);">▶ Play</button>
+          <button onclick="pauseFlashcardSlideshow()" style="background:#ea580c;">⏸ Pause</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 2: WORKSPACE FLEX CONTAINER -->
+  <main class="container">
+    
+    <!-- SIDEBAR: LOCAL REPOSITORY FILE SHELF -->
+    <section class="library-shelf">
+      <h3 style="color:var(--clinical-blue); font-size:1rem; margin-bottom:8px;">📁 Document Library</h3>
+      <input type="text" id="library-filename-input" placeholder="Name this lecture archive..." style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:6px; font-size:0.8rem;">
+      <button onclick="commitActiveNoteToLibrary()" style="width:100%; background:var(--clinical-green);">Save Note File</button>
+      <div id="file-directory-dump" style="margin-top:10px; display:flex; flex-direction:column; gap:4px;"></div>
+    </section>
+
+    <!-- RESEARCH WORKSPACE CARD -->
+    <section class="research-center-card">
+      <h2 style="color:var(--clinical-blue); font-size:1.2rem;">🔬 AI Research Center & Clinical Library</h2>
+      
+      <!-- INTEGRATED CORE MICROPHONE CONTROL ROW -->
+      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <button id="mic-trigger-action-btn" onclick="toggleClassroomDictationLoop()" style="background:#dc2626;">🎤 Start Classroom Dictation</button>
+        <button onclick="processAIStructureRefinement()" style="background:var(--clinical-green);">✨ Polish & Structure Notes</button>
+      </div>
+
+      <textarea id="workspace-primary-editor" rows="12" placeholder="Start typing clinical topics, highlight sentences to create decks, or turn on the microphone to stream live classroom audio directly onto this note canvas..."></textarea>
+
+      <!-- BASE LAYOUT: ADAPTIVE ASSESSMENT MODULE -->
+      <fieldset style="margin-top:20px; padding:15px; border:2px dashed #cbd5e1; border-radius:12px; background:#fafafa;">
+        <legend style="padding:0 8px; font-weight:bold; color:var(--clinical-blue); font-size:0.95rem;">🎯 Targeted Quiz Matrix</legend>
+        <div style="margin-bottom:10px; font-size:0.85rem; display:flex; gap:15px;">
+          <label><input type="radio" name="quiz-source" value="current" checked> Active Note Context</label>
+          <label><input type="radio" name="quiz-source" value="custom"> Custom Target Topic</label>
+        </div>
+        <input type="text" id="quiz-topic-override" placeholder="Enter isolated topic if verified above (e.g., Pharmacokinetics of Digoxin)..." style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; margin-bottom:10px;">
+        <button onclick="triggerQuizGenerationEngine()" style="width:100%; background:var(--clinical-blue);">Compile Adaptive Exam</button>
+        <div id="quiz-render-sandbox" style="margin-top:12px;"></div>
+      </fieldset>
+    </section>
+  </main>
+
+  <!-- LAYER 3: PERSISTENT SLIDE DRAWER TOOLBOX -->
+    
