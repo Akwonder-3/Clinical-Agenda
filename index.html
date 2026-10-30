@@ -55,6 +55,13 @@
     /* MAIN EDITING & RESEARCH HUB */
     .research-center-card { background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-top: 4px solid var(--clinical-blue); }
     textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; margin-top: 8px; line-height: 1.4; color: var(--text); }
+        /* Fixes layout overflow for the targeted quiz container */
+    fieldset {
+      width: 100%;
+      min-width: 0; /* Prevents long placeholder text from pushing the borders out */
+      box-sizing: border-box;
+    }
+    
     
     /* ACADEMIC TOOLBOX DRAWERS */
     #academic-drawer { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.12); border-radius: 16px 16px 0 0; transform: translateY(calc(100% - 44px)); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); height: 55vh; z-index: 1000; }
@@ -71,7 +78,9 @@
 
   <!-- FLOATING INTERACTIVE HIGHLIGHT SHORTCUT -->
   <div id="text-highlight-badge">⚡ Make Flashcard</div>
-
+      <!-- BASE LAYOUT: ADAPTIVE ASSESSMENT MODULE WITH SPACING FIXED -->
+      <fieldset style="margin-top:20px; padding:15px; border:2px dashed var(--clinical-blue); border-radius:12px; background: rgba(255,255,255,0.02); max-width: 100%;">
+        
   <!-- LAYER 1: ABSOLUTE TOP FLASHCARD CAROUSEL ENGINE -->
   <section id="flashcard-layer">
     <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
