@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function NurserUltraModern() {
+export default function App() {
   // --- NAVIGATION & GLOBAL CONFIGS ---
   const [activeCategory, setActiveCategory] = useState('dashboard');
   const [settings, setSettings] = useState({
